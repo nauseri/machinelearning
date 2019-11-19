@@ -1,3 +1,4 @@
+# lesson 7 of ml mastery python ml mini-course
 
 # Python version
 import sys
@@ -20,7 +21,7 @@ import keras
 print('keras: %s' % keras.__version__)
 
 
-# Lesson 7: Algorithm Evaluation With Resampling Methods
+# Lesson 7: Algorithm Evaluation With Resampling Methods, which algo is good to use for this problem
 # goal practice resampling methods in scikit-learn
 
 # resampling: statistical methods split training dataset into subsets
@@ -67,7 +68,7 @@ kfold = KFold(n_splits=10, random_state=7)
 # https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LogisticRegression.html
 model = LogisticRegression(solver='liblinear')
 # Evaluate a score by cross-validation
-# https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.cross_val_score.html
+# https://scikit-learn.org/stable/modules/cross_validation.html#cross-validation
 results = cross_val_score(model, mm_rescaledXX, Y, cv=kfold)
 print("Accuracy logreg: %.3f%% (%.3f%%)" % (results.mean()*100.0, results.std()*100.0))
 
@@ -77,7 +78,7 @@ from sklearn.svm import LinearSVC
 kfold2 = KFold(n_splits=20, random_state=7)
 model2 = LinearSVC(random_state=0, tol=1e-5)
 results2 = cross_val_score(model2, mm_rescaledXX, Y, cv=kfold2)
-print("Accuracy linsvc: %.3f%% (%.3f%%)" % (results2.mean()*100.0, results2.std()*100.0))
+print("Accuracy linsvc: %.3f%% (%.3f%%)" % (results2.mean()*100.0, results2.std()*100.0))  # i guess accuracy is scoring default...
 
 # # Estimate the accuracy of an algorithm using leave one out cross validation
 # from sklearn.model_selection import LeaveOneOut

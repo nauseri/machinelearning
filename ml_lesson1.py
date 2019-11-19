@@ -1,6 +1,6 @@
 
 
-
+# ml mastery python ml mini-course lessons 1-6:
 
 # Lesson 1: Download and Install Python and SciPy
 # install everything at once (much easier) with Anaconda.
