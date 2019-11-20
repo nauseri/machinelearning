@@ -58,7 +58,6 @@ results = cross_val_score(model, X, Y, cv=kfold, scoring=scoring)
 print(results.mean())
 
 
-
 url = "https://raw.githubusercontent.com/jbrownlee/Datasets/master/housing.data"
 names = ['CRIM', 'ZN', 'INDUS', 'CHAS', 'NOX', 'RM', 'AGE', 'DIS', 'RAD', 'TAX', 'PTRATIO', 'B', 'LSTAT', 'MEDV']
 dataframe = read_csv(url, delim_whitespace=True, names=names)
@@ -88,7 +87,6 @@ results = cross_val_score(model, X, Y, cv=kfold, scoring=scoring)
 print(results.mean())
 
 
-well
 
 
 
