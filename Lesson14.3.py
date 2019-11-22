@@ -21,8 +21,6 @@ from sklearn.svm import SVC
 from pandas import set_option
 
 
-
-
 # https://archive.ics.uci.edu/ml/datasets/Iris
 # Attribute Info: 1. sepal length in cm, 2. sepal width in cm, 3. petal length in cm, 4. petal width in cm,
 # 5. class: Iris Setosa, Iris Versicolour, Iris Virginica
@@ -74,7 +72,6 @@ print('xgb\n', report)
 
 # Compare Machine Learning Algorithms
 models = []
-
 models.append(('RFC', RandomForestClassifier(n_estimators=100, random_state=seed)))
 models.append(('XGB', xgboost.XGBClassifier(max_depth=3, eta=1, objective='reg:logistic')))
 models.append(('SVM', SVC(gamma='auto')))
