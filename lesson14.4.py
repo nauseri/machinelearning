@@ -22,8 +22,9 @@ from sklearn.pipeline import FeatureUnion
 from sklearn.linear_model import LogisticRegression
 from sklearn.decomposition import PCA
 from sklearn.feature_selection import SelectKBest
-
-
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.neighbors import KNeighborsClassifier
 
 # https://archive.ics.uci.edu/ml/datasets/Iris
 # Attribute Info: 1. sepal length in cm, 2. sepal width in cm, 3. petal length in cm, 4. petal width in cm,
@@ -31,132 +32,48 @@ from sklearn.feature_selection import SelectKBest
 filename = 'iris.data.csv'
 names = ['sepal len', 'sepal wid', 'petal len', 'petal wid', 'class']
 data = read_csv(filename, names=names)
-del data['sepal wid']
+# del data['sepal wid']
 array = data.values
-X = array[:, 0:3]
-Y = array[:, 3]
+X = array[:, 0:4]
+Y = array[:, 4]
 target_names = ['Iris-setosa', 'Iris-versicolour', 'Iris-virginica']
-test_size = 0.3
+
+validation_size = 0.20
 seed = 7
+X_train, X_validation, Y_train, Y_validation = train_test_split(X, Y, test_size=validation_size, random_state=seed)
 
-
-
+seed = 7
+num_trees = 100
+max_features = 3
 # create feature union
 features = []
 features.append(('PCA', PCA(n_components=3)))
 features.append(('select_best', SelectKBest(k=3)))
 feature_union = FeatureUnion(features)
 # create pipeline
-estimator = []
-estimator.append(('feature_union', feature_union))
-estimator.append(('MinMaxScale',  MinMaxScaler()))
-
-estimator_mid = Pipeline(estimator)
-
 estimators = []
-model = Pipeline(estimators)
+estimators.append(('feature_union', feature_union))
+estimators.append(('StandardScaler',  StandardScaler()))
+pipelines = []
+pipelines.append(('scaledRF', Pipeline([('feature_union', feature_union), ('StandardScale',  StandardScaler()), ('RFC', RandomForestClassifier(n_estimators=num_trees, max_features=max_features, random_state=seed))])))
+pipelines.append(('scaledXGB', Pipeline([('feature_union', feature_union), ('StandardScale',  StandardScaler()), ('XGB', xgboost.XGBClassifier(max_depth=3, eta=1, objective='reg:logistic'))])))
+pipelines.append(('scaledSVC', Pipeline([('feature_union', feature_union), ('StandardScale',  StandardScaler()), ('SVM', SVC(gamma='auto'))])))
+pipelines.append(('scaledLDA', Pipeline([('feature_union', feature_union), ('StandardScale',  StandardScaler()), ('LDA', LinearDiscriminantAnalysis())])))
+pipelines.append(('scaledKNN', Pipeline([('feature_union', feature_union), ('StandardScale',  StandardScaler()), ('KNN', KNeighborsClassifier())])))
 
-
-estimators.append(('LR', LogisticRegression(solver='liblinear', multi_class='auto')))
-
-# estimators.append(('RFC', RandomForestClassifier(n_estimators=100, random_state=seed)))
-# estimators.append(('XGB', xgboost.XGBClassifier(max_depth=3, eta=1, objective='reg:logistic')))
-# estimators.append(('SVM', SVC(gamma='auto')))
-# estimators.append(('LDA', LinearDiscriminantAnalysis()))
-# estimators.append(('CART', DecisionTreeClassifier()))
-
+# evaluate pipeline
+num_folds = 10
 scoring = 'accuracy'
-kfold = KFold(n_splits=10, random_state=7)
-
-for i in estimators:
-    # evaluate pipeline
-    model = Pipeline(estimators)
-    # with CV, need only training and test set (only 2 partitions of the data)
-    # no validation set needed as in split_train_test (3 partitions of the data)
-    results = cross_val_score(model, X, Y, cv=kfold, scoring=scoring)
-    print("accuracy %f (%f)" % (results.mean()*100, results.std()*100))
-
-
+results = []
+names = []
+for name, model in pipelines:
+    kfold = KFold(n_splits=num_folds, random_state=seed)
+    cv_results = cross_val_score(model, X_train, Y_train, cv=kfold, scoring=scoring)
+    results.append(cv_results)
+    names.append(name)
+    msg = "%s: %f (%f)" % (name, cv_results.mean()*100, cv_results.std()*100)
+    print(msg)
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#
-# # Evaluation:
-# test_size = 0.3
-# seed = 7
-# Y_test: object
-# X_train, X_test, Y_train, Y_test = train_test_split(Xre, Y, test_size=test_size, random_state=seed)
-# kfold = KFold(n_splits=20, random_state=seed)
-#
-# # Evaluate using kfold Cross Validation
-# model = LinearDiscriminantAnalysis()
-# model.fit(X_train, Y_train)
-# predicted = model.predict(X_test)
-# matrix = confusion_matrix(Y_test, predicted)
-# print(matrix)
-# # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.precision_recall_fscore_support.html#sklearn.metrics.precision_recall_fscore_support
-# report = classification_report(Y_test, predicted)
-# print('lda\n', report)
-#
-# model1 = RandomForestClassifier(n_estimators=100, random_state=seed)
-# model1.fit(X_train, Y_train)
-# predicted = model1.predict(X_test)
-# report = classification_report(Y_test, predicted)
-# print('rf\n', report)
-#
-# model2 = xgboost.XGBClassifier(max_depth=3, eta=1, objective='reg:logistic')
-# model2.fit(X_train, Y_train)
-# predicted = model2.predict(X_test)
-# report = classification_report(Y_test, predicted)
-# print('xgb\n', report)
-#
-# # Compare Machine Learning Algorithms
-# models = []
-#
-# models.append(('RFC', RandomForestClassifier(n_estimators=100, random_state=seed)))
-# models.append(('XGB', xgboost.XGBClassifier(max_depth=3, eta=1, objective='reg:logistic')))
-# models.append(('SVM', SVC(gamma='auto')))
-# models.append(('LDA', LinearDiscriminantAnalysis()))
-# models.append(('CART', DecisionTreeClassifier()))
-# #
-# results = []
-# names = []
-# scoring = 'accuracy'
-#
-# for name, model in models:
-#     set_option('precision', 3)
-#     kfold = KFold(n_splits=10, random_state=7)
-#     cv_results = cross_val_score(model, X_train, Y_train, cv=kfold, scoring=scoring)
-#     results.append(cv_results)
-#     names.append(name)
-#     msg = "%s: %f (%f)" % (name, cv_results.mean()*100, cv_results.std()*100)
-#     print(msg)
-#
-# # boxplot algorithm comparison
-# fig = plt.figure()
-# fig.suptitle('Algorithm Comparison')
-# ax = fig.add_subplot(111)
-# plt.boxplot(results)
-# ax.set_xticklabels(names)
-# plt.show()
-#
