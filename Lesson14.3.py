@@ -11,7 +11,7 @@ from sklearn.model_selection import KFold
 from sklearn.model_selection import cross_val_score
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
-import xgboost
+import xgboost  # at eth computer, need to add this with conda
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
 import matplotlib.pyplot as plt
